@@ -1,0 +1,23 @@
+# Environment & Secrets
+.env
+*.env
+
+# Python / Virtual Environment
+__pycache__/
+*.py[cod]
+venv/
+.venv/
+myenv/
+.myenv/
+
+# DeclaBuddy Local Databases & Generated Files
+addresses.db
+addresses_temp.db
+db_meta.json
+temp_uploads/
+*.pdf
+
+# IDE & OS files
+.vscode/
+.idea/
+.DS_Store
