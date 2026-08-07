@@ -58,6 +58,21 @@ function addFilesToDataArray(files) {
     updateVisualFileList();
 }
 
+function truncateFilename(filename, maxLength = 28) {
+    if (filename.length <= maxLength) return filename;
+    
+    const extIndex = filename.lastIndexOf('.');
+    if (extIndex !== -1 && filename.length - extIndex <= 6) {
+        const ext = filename.substring(extIndex);
+        const nameWithoutExt = filename.substring(0, extIndex);
+        const availableChars = maxLength - ext.length - 3; // 3 for "..."
+        if (availableChars > 3) {
+            return nameWithoutExt.substring(0, availableChars) + "..." + ext;
+        }
+    }
+    return filename.substring(0, maxLength - 3) + "...";
+}
+
 function updateVisualFileList() {
     const listDisplay = document.getElementById("selectedFilesList");
     if (!listDisplay) return;
@@ -65,8 +80,11 @@ function updateVisualFileList() {
     globalFilesArray.forEach((file, index) => {
         const li = document.createElement("li");
         li.className = "file-item";
+        
+        const truncatedName = truncateFilename(file.name, 28);
+        
         li.innerHTML = `
-            <span>📎 ${file.name} (${(file.size/1024).toFixed(1)} KB)</span>
+            <span title="${file.name}">📎 ${truncatedName} (${(file.size/1024).toFixed(1)} KB)</span>
             <button type="button" class="remove-file-btn" onclick="removeFileFromBuffer(${index})">${currentLanguage === 'nl' ? 'Verwijder' : 'Remove'}</button>
         `;
         listDisplay.appendChild(li);

@@ -180,21 +180,30 @@ th {
 .file-item {
     display: flex;
     justify-content: space-between;
+    align-items: center;
+    gap: 10px;
     background: #e9ecef;
     padding: 6px 10px;
     margin-bottom: 5px;
     border-radius: 4px;
-    align-items: center;
+}
+
+.file-item span {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    min-width: 0;
 }
 
 .remove-file-btn {
     background: #dc3545;
     color: white;
     border: none;
-    padding: 2px 6px;
+    padding: 4px 8px;
     border-radius: 3px;
     cursor: pointer;
     font-size: 11px;
+    flex-shrink: 0;
 }
 
 ul.file-list,
