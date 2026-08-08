@@ -3,6 +3,10 @@ let currentLanguage = 'nl';
 let signatureMode = 'draw';
 let uploadedSignatureBase64 = "";
 
+// File size limits
+const MAX_FILE_SIZE_MB = 25; // 25 MB
+const MAX_FILE_SIZE_BYTES = MAX_FILE_SIZE_MB * 1024 * 1024;
+
 function switchLanguage(lang) {
     currentLanguage = lang;
     document.querySelectorAll('.lang-btn').forEach(b => b.classList.remove('active'));
@@ -54,7 +58,17 @@ if (dropZone) {
 
 function addFilesToDataArray(files) {
     if (!files) return;
-    for (let i = 0; i < files.length; i++) { globalFilesArray.push(files[i]); }
+    for (let i = 0; i < files.length; i++) {
+        const file = files[i];
+        if (file.size > MAX_FILE_SIZE_BYTES) {
+            const msg = currentLanguage === 'nl' 
+                ? `Bestand "${file.name}" is te groot. Maximale bestandsgrootte is ${MAX_FILE_SIZE_MB} MB.`
+                : `File "${file.name}" is too large. Maximum file size is ${MAX_FILE_SIZE_MB} MB.`;
+            alert(msg);
+            continue; // Skip oversized files
+        }
+        globalFilesArray.push(file);
+    }
     updateVisualFileList();
 }
 

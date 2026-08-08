@@ -21,6 +21,15 @@ load_dotenv()
 app = Flask(__name__)
 app.secret_key = os.getenv("FLASK_SECRET_KEY")
 
+# Set maximum upload size limit to 25 MB
+app.config['MAX_CONTENT_LENGTH'] = 25 * 1024 * 1024
+
+# Handle HTTP 413 "Request Entity Too Large" errors cleanly
+@app.errorhandler(413)
+def request_entity_too_large(error):
+    flash("Fout: De geüploade bestanden zijn te groot (maximaal 25 MB totaal).", "error")
+    return redirect(url_for('claim_form'))
+
 PDF_TEMPLATE_PATH = "claim_template.pdf"
 DB_PATH = "addresses.db"
 TEMP_DIR = os.path.join(os.getcwd(), "temp_uploads")
