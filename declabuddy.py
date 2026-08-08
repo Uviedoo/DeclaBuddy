@@ -8,6 +8,8 @@ from datetime import datetime
 from flask import Flask, render_template, request, send_file, flash, redirect, url_for, jsonify
 from dotenv import load_dotenv
 from apscheduler.schedulers.background import BackgroundScheduler
+from flask_limiter import Limiter
+from flask_limiter.util import get_remote_address
 
 # Database auto-update script
 from setup_address_db import init_address_database
@@ -24,10 +26,51 @@ app.secret_key = os.getenv("FLASK_SECRET_KEY")
 # Set maximum upload size limit to 25 MB
 app.config['MAX_CONTENT_LENGTH'] = 25 * 1024 * 1024
 
+# Set up Rate Limiter (uses IP address by default)
+limiter = Limiter(
+    get_remote_address,
+    app=app,
+    default_limits=["200 per day", "50 per hour"],
+    storage_uri="memory://"
+)
+
+# Allowed upload extensions
+ALLOWED_EXTENSIONS = {'pdf', 'png', 'jpg', 'jpeg', 'webp', 'tiff'}
+
+def is_allowed_file(filename: str) -> bool:
+    """Checks whether the file has an allowed extension."""
+    if not filename or '.' not in filename:
+        return False
+    ext = filename.rsplit('.', 1)[1].lower()
+    return ext in ALLOWED_EXTENSIONS
+
+# SECURITY HEADERS
+@app.after_request
+def set_security_headers(response):
+    """Enforces standard security headers on all HTTP responses."""
+    response.headers['X-Content-Type-Options'] = 'nosniff'
+    response.headers['X-Frame-Options'] = 'SAMEORIGIN'
+    response.headers['X-XSS-Protection'] = '1; mode=block'
+    response.headers['Referrer-Policy'] = 'strict-origin-when-cross-origin'
+    response.headers['Content-Security-Policy'] = (
+        "default-src 'self'; "
+        "script-src 'self' 'unsafe-inline'; "
+        "style-src 'self' 'unsafe-inline'; "
+        "img-src 'self' data:; "
+        "font-src 'self';"
+    )
+    return response
+
 # Handle HTTP 413 "Request Entity Too Large" errors cleanly
 @app.errorhandler(413)
 def request_entity_too_large(error):
     flash("Fout: De geüploade bestanden zijn te groot (maximaal 25 MB totaal).", "error")
+    return redirect(url_for('claim_form'))
+
+# Handle HTTP 429 "Rate Limit Exceeded" errors cleanly
+@app.errorhandler(429)
+def rate_limit_exceeded(error):
+    flash("Te veel verzoeken! Probeer het later opnieuw.", "error")
     return redirect(url_for('claim_form'))
 
 PDF_TEMPLATE_PATH = "claim_template.pdf"
@@ -53,8 +96,6 @@ scheduler.add_job(
     replace_existing=True
 )
 
-# Fix: Only start the background scheduler in the active worker process
-# (Ignores the Werkzeug debug reloader supervisor process)
 if os.environ.get('WERKZEUG_RUN_MAIN') == 'true' or not app.debug:
     scheduler.start()
     threading.Thread(target=run_address_db_check, daemon=True).start()
@@ -94,6 +135,10 @@ def flatten_and_sanitize_pdf(filled_bytes: bytes, receipt_files: list) -> bytes:
     # 2. Append receipt uploads behind form pages
     for file in receipt_files:
         if file and file.filename != '':
+            # Validate file extension before reading/processing
+            if not is_allowed_file(file.filename):
+                raise ValueError(f"Bestandstype van '{file.filename}' is niet toegestaan.")
+
             file_bytes = file.read()
             filename_lc = file.filename.lower()
 
@@ -125,6 +170,7 @@ def flatten_and_sanitize_pdf(filled_bytes: bytes, receipt_files: list) -> bytes:
 
 # LOCAL HOSTED ADDRESS LOOKUP API
 @app.route("/api/address-lookup", methods=["GET"])
+@limiter.limit("30 per minute")  # Prevent address lookup API spamming
 def api_address_lookup():
     postcode = request.args.get("postcode", "").replace(" ", "").upper()
     huisnummer = request.args.get("huisnummer", "").strip()
@@ -166,6 +212,7 @@ def api_address_lookup():
         return jsonify({"success": False, "error": str(e)}), 500
 
 @app.route("/", methods=["GET", "POST"])
+@limiter.limit("10 per minute", methods=["POST"])  # Limit form submissions to 10/min
 def claim_form():
     if request.method == "POST":
         data_to_fill = {
@@ -217,7 +264,7 @@ def claim_form():
 
             receipt_files = request.files.getlist("Bijlagen")
 
-            # Step 2: Refresh appearances, append receipts (fitted to A4), and bake fields into static page graphics
+            # Step 2: Validate extension, refresh appearances, append receipts, and bake fields into static graphics
             final_pdf_bytes = flatten_and_sanitize_pdf(filled_form_bytes, receipt_files)
 
             if temp_sig_path and os.path.exists(temp_sig_path):
