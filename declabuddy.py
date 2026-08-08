@@ -10,6 +10,7 @@ from dotenv import load_dotenv
 from apscheduler.schedulers.background import BackgroundScheduler
 from flask_limiter import Limiter
 from flask_limiter.util import get_remote_address
+import filetype
 
 # Database auto-update script
 from setup_address_db import init_address_database
@@ -26,7 +27,7 @@ app.secret_key = os.getenv("FLASK_SECRET_KEY")
 # Set maximum upload size limit to 25 MB
 app.config['MAX_CONTENT_LENGTH'] = 25 * 1024 * 1024
 
-# Set up Rate Limiter (uses IP address by default)
+# Set up Rate Limiter
 limiter = Limiter(
     get_remote_address,
     app=app,
@@ -34,15 +35,38 @@ limiter = Limiter(
     storage_uri="memory://"
 )
 
-# Allowed upload extensions
+# Allowed file extensions & MIME types
 ALLOWED_EXTENSIONS = {'pdf', 'png', 'jpg', 'jpeg', 'webp', 'tiff'}
+ALLOWED_MIME_TYPES = {
+    'application/pdf',
+    'image/png',
+    'image/jpeg',
+    'image/webp',
+    'image/tiff'
+}
 
-def is_allowed_file(filename: str) -> bool:
-    """Checks whether the file has an allowed extension."""
+def is_allowed_file(file_storage) -> bool:
+    """
+    Validates both the filename extension AND the binary magic bytes (MIME type).
+    """
+    filename = file_storage.filename
     if not filename or '.' not in filename:
         return False
+
+    # 1. Extension check
     ext = filename.rsplit('.', 1)[1].lower()
-    return ext in ALLOWED_EXTENSIONS
+    if ext not in ALLOWED_EXTENSIONS:
+        return False
+
+    # 2. Magic byte (MIME type) check
+    header = file_storage.read(260)  # Read first 260 bytes to inspect file header
+    file_storage.seek(0)             # CRITICAL: Reset file pointer for subsequent reading!
+
+    kind = filetype.guess(header)
+    if kind is None or kind.mime not in ALLOWED_MIME_TYPES:
+        return False
+
+    return True
 
 # SECURITY HEADERS
 @app.after_request
@@ -135,9 +159,9 @@ def flatten_and_sanitize_pdf(filled_bytes: bytes, receipt_files: list) -> bytes:
     # 2. Append receipt uploads behind form pages
     for file in receipt_files:
         if file and file.filename != '':
-            # Validate file extension before reading/processing
-            if not is_allowed_file(file.filename):
-                raise ValueError(f"Bestandstype van '{file.filename}' is niet toegestaan.")
+            # Validate extension AND magic byte MIME type
+            if not is_allowed_file(file):
+                raise ValueError(f"Bestandstype of inhoud van '{file.filename}' is niet toegestaan.")
 
             file_bytes = file.read()
             filename_lc = file.filename.lower()
@@ -264,19 +288,23 @@ def claim_form():
 
             receipt_files = request.files.getlist("Bijlagen")
 
-            # Step 2: Validate extension, refresh appearances, append receipts, and bake fields into static graphics
+            # Step 2: Validate extension + MIME, refresh appearances, append receipts, and bake fields into static graphics
             final_pdf_bytes = flatten_and_sanitize_pdf(filled_form_bytes, receipt_files)
 
             if temp_sig_path and os.path.exists(temp_sig_path):
                 os.remove(temp_sig_path)
 
             output_filename = f"Declaratie_{data_to_fill['Naam'].replace(' ', '_')}.pdf"
-            return send_file(
+            response = send_file(
                 io.BytesIO(final_pdf_bytes),
                 as_attachment=True,
                 download_name=output_filename,
                 mimetype="application/pdf"
             )
+            # Prevent caching of personal claim documents
+            response.headers['Cache-Control'] = 'no-store, no-cache, must-revalidate, max-age=0'
+            response.headers['Pragma'] = 'no-cache'
+            return response
 
         except Exception as e:
             if temp_sig_path and os.path.exists(temp_sig_path):
