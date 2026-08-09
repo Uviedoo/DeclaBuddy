@@ -5,71 +5,16 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>LSVb DeclaBuddy</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
-    <style>
-        /* --- Information Tooltip Styles --- */
-        .info-tooltip {
-            position: relative;
-            cursor: pointer;
-            display: inline-block;
-            margin-left: 4px;
-            font-size: 0.85em;
-            user-select: none;
-        }
-
-        .info-tooltip::after {
-            content: attr(data-tooltip);
-            position: absolute;
-            bottom: 130%;
-            left: 50%;
-            transform: translateX(-50%);
-            background-color: #2c3e50;
-            color: #ffffff;
-            padding: 6px 10px;
-            border-radius: 5px;
-            font-size: 0.8rem;
-            font-weight: normal;
-            white-space: nowrap;
-            box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.15);
-            visibility: hidden;
-            opacity: 0;
-            transition: opacity 0.2s ease-in-out, visibility 0.2s ease-in-out;
-            z-index: 1000;
-            pointer-events: none;
-        }
-
-        .info-tooltip::before {
-            content: '';
-            position: absolute;
-            bottom: 110%;
-            left: 50%;
-            transform: translateX(-50%);
-            border-width: 5px;
-            border-style: solid;
-            border-color: #2c3e50 transparent transparent transparent;
-            visibility: hidden;
-            opacity: 0;
-            transition: opacity 0.2s ease-in-out, visibility 0.2s ease-in-out;
-            z-index: 1000;
-        }
-
-        .info-tooltip:hover::after,
-        .info-tooltip:hover::before {
-            visibility: visible;
-            opacity: 1;
-        }
-
-        /* --- Address Lookup Status Message Formatting --- */
-        .address-status-msg {
-            font-size: 0.85rem;
-            margin-top: -5px;
-            margin-bottom: 10px;
-            font-weight: 500;
-        }
-    </style>
 </head>
 <body>
 
 <div class="wrapper">
+    <!-- LANGUAGE SWITCHER - ABSOLUTE TOP RIGHT -->
+    <div class="lang-switch">
+        <button type="button" class="lang-btn active" onclick="switchLanguage('nl')">NL</button>
+        <button type="button" class="lang-btn" onclick="switchLanguage('en')">EN</button>
+    </div>
+
     <h2>LSVb DeclaBuddy (beta)</h2>
     
     <div class="intro-text">
@@ -77,12 +22,11 @@
         <p class="lang-el lang-hidden" lang="en">Welcome to the LSVb expense claim tool. Fill out your details and expenses below to instantly generate an official PDF claim form. You can drag and drop your receipts (images or PDFs) to attach them directly.</p>
     </div>
 
-<!-- STEP-BY-STEP PROCESS SECTION -->
+    <!-- STEP-BY-STEP PROCESS SECTION -->
     <div class="steps-container">
-    <!-- STEP 1: CHECK RULES -->
+        <!-- STEP 1: CHECK RULES -->
         <div class="step-card">
             <div class="step-circle">
-                <!-- Document/Rules Check Icon -->
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
                     <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
                     <polyline points="14 2 14 8 20 8"></polyline>
@@ -99,10 +43,10 @@
                 <span class="lang-el lang-hidden" lang="en">If your expense is not covered in the conditions, contact the treasurer first.</span>
             </p>
         </div>
+
         <!-- STEP 2: GATHER RECEIPTS -->
         <div class="step-card">
             <div class="step-circle">
-                <!-- Receipt Icon -->
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
                     <path d="M4 2v20l2-1 2 1 2-1 2 1 2-1 2 1 2-1 2 1V2l-2 1-2-1-2 1-2-1-2 1-2-1-2 1-2-1z"></path>
                     <line x1="8" y1="6" x2="16" y2="6"></line>
@@ -120,9 +64,9 @@
             </p>
         </div>
 
+        <!-- STEP 3: FILL FORM -->
         <div class="step-card">
             <div class="step-circle">
-                <!-- Form/Edit Icon -->
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
                     <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
                     <polyline points="14 2 14 8 20 8"></polyline>
@@ -140,9 +84,9 @@
             </p>
         </div>
 
+        <!-- STEP 4: SUBMIT -->
         <div class="step-card">
             <div class="step-circle">
-                <!-- Send/Submit Icon -->
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
                     <path d="M22 2L11 13"></path>
                     <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
@@ -158,9 +102,9 @@
             </p>
         </div>
 
+        <!-- STEP 5: CONFIRMATION -->
         <div class="step-card">
             <div class="step-circle">
-                <!-- Confirmation Mail Icon -->
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
                     <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path>
                     <polyline points="22,6 12,13 2,6"></polyline>
@@ -176,11 +120,6 @@
             </p>
         </div>
     </div>
-    
-    <div class="lang-switch">
-        <button type="button" class="lang-btn active" onclick="switchLanguage('nl')">NL</button>
-        <button type="button" class="lang-btn" onclick="switchLanguage('en')">EN</button>
-    </div>
 
     {% with messages = get_flashed_messages() %}
       {% if messages %}
@@ -189,6 +128,7 @@
     {% endwith %}
 
     <form id="claimForm" action="/" method="POST" enctype="multipart/form-data">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
         <input type="hidden" id="Handtekening_data" name="Handtekening_data">
         
         <h3>
@@ -218,7 +158,7 @@
             </div>
         </div>
 
-        <!-- PDOK ADDRESS LOOKUP SECTION -->
+        <!-- ADDRESS LOOKUP SECTION -->
         <div class="grid-2">
             <div class="field-group">
                 <label>
@@ -236,7 +176,6 @@
             </div>
         </div>
 
-        <!-- Auto-lookup status feedback indicator -->
         <div id="address-status" class="address-status-msg" style="display: none;"></div>
 
         <div class="grid-2">
@@ -287,41 +226,44 @@
             <span class="lang-el" lang="nl">2. Kostenoverzicht</span>
             <span class="lang-el lang-hidden" lang="en">2. Expense Breakdown</span>
         </h3>
-        <table>
-            <thead>
-                <tr>
-                    <th style="width: 5%;">#</th>
-                    <th style="width: 25%;">
-                        <span class="lang-el" lang="nl">Datum transactie</span>
-                        <span class="lang-el lang-hidden" lang="en">Transaction Date</span>
-                    </th>
-                    <th style="width: 50%;">
-                        <span class="lang-el" lang="nl">Omschrijving kosten (reiskosten, lunch, enz.)</span>
-                        <span class="lang-el lang-hidden" lang="en">Expense Description (travel, lunch, etc.)</span>
-                    </th>
-                    <th style="width: 20%;">
-                        <span class="lang-el" lang="nl">Bedrag (€)</span>
-                        <span class="lang-el lang-hidden" lang="en">Amount (€)</span>
-                    </th>
-                </tr>
-            </thead>
-            <tbody>
-                <tr>
-                    <td>1</td>
-                    <td><input type="date" name="Datum_transactie1" required></td>
-                    <td><input type="text" name="Omschrijving1" required></td>
-                    <td><input type="number" name="Bedrag1" class="expense-amount" step="0.01" min="0" placeholder="0,00" required></td>
-                </tr>
-                {% for i in range(2, 11) %}
-                <tr>
-                    <td>{{ i }}</td>
-                    <td><input type="date" name="Datum_transactie{{ i }}"></td>
-                    <td><input type="text" name="Omschrijving{{ i }}"></td>
-                    <td><input type="number" name="Bedrag{{ i }}" class="expense-amount" step="0.01" min="0" placeholder="0,00"></td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
+        
+        <div class="table-responsive">
+            <table>
+                <thead>
+                    <tr>
+                        <th style="width: 5%;">#</th>
+                        <th style="width: 25%;">
+                            <span class="lang-el" lang="nl">Datum transactie</span>
+                            <span class="lang-el lang-hidden" lang="en">Transaction Date</span>
+                        </th>
+                        <th style="width: 50%;">
+                            <span class="lang-el" lang="nl">Omschrijving kosten (reiskosten, lunch, enz.)</span>
+                            <span class="lang-el lang-hidden" lang="en">Expense Description (travel, lunch, etc.)</span>
+                        </th>
+                        <th style="width: 20%;">
+                            <span class="lang-el" lang="nl">Bedrag (€)</span>
+                            <span class="lang-el lang-hidden" lang="en">Amount (€)</span>
+                        </th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>1</td>
+                        <td><input type="date" name="Datum_transactie1" required></td>
+                        <td><input type="text" name="Omschrijving1" required></td>
+                        <td><input type="number" name="Bedrag1" class="expense-amount" step="0.01" min="0" placeholder="0,00" required></td>
+                    </tr>
+                    {% for i in range(2, 11) %}
+                    <tr>
+                        <td>{{ i }}</td>
+                        <td><input type="date" name="Datum_transactie{{ i }}"></td>
+                        <td><input type="text" name="Omschrijving{{ i }}"></td>
+                        <td><input type="number" name="Bedrag{{ i }}" class="expense-amount" step="0.01" min="0" placeholder="0,00"></td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
 
         <div class="total-box">
             <label>
@@ -426,8 +368,8 @@
         </div>
     </form>
 
-<!-- VERGOEDINGSVOORWAARDEN / REIMBURSEMENT CONDITIONS SECTION -->
-<div id="voorwaarden" class="conditions-container" style="margin-top: 40px; padding: 25px; background: #f9f9f9; border-radius: 8px; border-left: 4px solid #c52a30;">
+    <!-- REIMBURSEMENT CONDITIONS SECTION -->
+    <div id="voorwaarden" class="conditions-container" style="margin-top: 40px; padding: 25px; background: #f9f9f9; border-radius: 8px; border-left: 4px solid #c52a30;">
         <h3 style="margin-top: 0; border-bottom: 2px solid #ddd; padding-bottom: 10px;">
             <span class="lang-el" lang="nl">📋 Wat mag ik declareren?</span>
             <span class="lang-el lang-hidden" lang="en">📋 What kind of expenses can I claim?</span>
@@ -454,147 +396,150 @@
         </ol>
 
         <!-- Rules Table -->
-        <table style="width: 100%; border-collapse: collapse; margin-top: 15px; font-size: 0.95em;">
-            <thead>
-                <tr style="background-color: #eee;">
-                    <th style="width: 25%; text-align: left; padding: 10px; border: 1px solid #ddd;">
-                        <span class="lang-el" lang="nl">Type kosten</span>
-                        <span class="lang-el lang-hidden" lang="en">Type of Expense</span>
-                    </th>
-                    <th style="width: 75%; text-align: left; padding: 10px; border: 1px solid #ddd;">
-                        <span class="lang-el" lang="nl">Declaratieregels</span>
-                        <span class="lang-el lang-hidden" lang="en">Claim Rules</span>
-                    </th>
-                </tr>
-            </thead>
-            <tbody>
-                <tr>
-                    <td style="padding: 10px; border: 1px solid #ddd; font-weight: bold; vertical-align: top;">
-                        <span class="lang-el" lang="nl">Reiskosten<br>(openbaar vervoer)</span>
-                        <span class="lang-el lang-hidden" lang="en">Travel Expenses<br>(public transport)</span>
-                    </td>
-                    <td style="padding: 10px; border: 1px solid #ddd; line-height: 1.5;">
-                        <ul style="margin: 0; padding-left: 18px;">
-                            <li>
-                                <span class="lang-el" lang="nl">Alleen het kortingstarief van reizen met het openbaar vervoer is declareerbaar. Dit is 60% van het voltarief.</span>
-                                <span class="lang-el lang-hidden" lang="en">Only the discount rate for public transport travel is claimable. This is 60% of the full fare.</span>
-                            </li>
-                            <li>
-                                <span class="lang-el" lang="nl">In het geval dat het niet mogelijk is om te reizen met het kortingstarief, kan er een uitzondering gemaakt worden op de regel hierboven. Hiervoor is van tevoren toestemming nodig van de penningmeester.</span>
-                                <span class="lang-el lang-hidden" lang="en">In cases where it is impossible to travel at a discounted rate, an exception can be made to the above rule. This requires prior approval from the treasurer.</span>
-                            </li>
-                            <li>
-                                <span class="lang-el" lang="nl">Het is mogelijk om een reisabonnement te declareren bij de LSVb, mits je kan aantonen dat dit voordeliger is voor de LSVb of dit van tevoren is afgesproken met de penningmeester.</span>
-                                <span class="lang-el lang-hidden" lang="en">It is possible to claim a travel subscription with the LSVb, provided you can demonstrate that this is more economical for the LSVb and it has been agreed upon in advance with the treasurer.</span>
-                            </li>
-                            <li>
-                                <span class="lang-el" lang="nl">Indien er van of naar een locatie gereisd wordt die verder ligt dan de woonplaats van de declarant, moet hier een aanvullende verklaring bij vermeldt worden, anders is het maximaal declareerbare bedrag tot of van een station in de woonplaats.</span>
-                                <span class="lang-el lang-hidden" lang="en">If traveling to or from a location further than the claimant's place of residence, an additional explanation must be included; otherwise, the maximum claimable amount is limited to the station in your town of residence.</span>
-                            </li>
-                        </ul>
-                    </td>
-                </tr>
-                <tr>
-                    <td style="padding: 10px; border: 1px solid #ddd; font-weight: bold; vertical-align: top;">
-                        <span class="lang-el" lang="nl">Reiskosten<br>(auto)</span>
-                        <span class="lang-el lang-hidden" lang="en">Travel Expenses<br>(car)</span>
-                    </td>
-                    <td style="padding: 10px; border: 1px solid #ddd; line-height: 1.5;">
-                        <ul style="margin: 0; padding-left: 18px;">
-                            <li>
-                                <span class="lang-el" lang="nl">Reiskosten met de auto zijn alleen declareerbaar als hier van tevoren toestemming voor is verleend door de penningmeester.</span>
-                                <span class="lang-el lang-hidden" lang="en">Car travel costs are only claimable if prior permission has been granted by the treasurer.</span>
-                            </li>
-                            <li>
-                                <span class="lang-el" lang="nl">Vergoeding voor autoreiskosten is op basis van van maximale wettelijke onbelaste bedrag (huidig: €0,23/km).</span>
-                                <span class="lang-el lang-hidden" lang="en">Reimbursement for car travel is based on the maximum legal untaxed allowance (currently: €0.23/km).</span>
-                            </li>
-                        </ul>
-                    </td>
-                </tr>
-                <tr>
-                    <td style="padding: 10px; border: 1px solid #ddd; font-weight: bold; vertical-align: top;">
-                        <span class="lang-el" lang="nl">Parkeerkosten</span>
-                        <span class="lang-el lang-hidden" lang="en">Parking fees</span>
-                    </td>
-                    <td style="padding: 10px; border: 1px solid #ddd; line-height: 1.5;">
-                        <ul style="margin: 0; padding-left: 18px;">
-                            <li>
-                                <span class="lang-el" lang="nl">Voor parkeerkosten is er voorgaand toestemming nodig van de penningmeester.</span>
-                                <span class="lang-el lang-hidden" lang="en">Prior approval from the treasurer is required for parking fees.</span>
-                            </li>
-                        </ul>
-                    </td>
-                </tr>
-                <tr>
-                    <td style="padding: 10px; border: 1px solid #ddd; font-weight: bold; vertical-align: top;">
-                        <span class="lang-el" lang="nl">Cateringkosten<br>(kantoor)</span>
-                        <span class="lang-el lang-hidden" lang="en">Catering costs<br>(office)</span>
-                    </td>
-                    <td style="padding: 10px; border: 1px solid #ddd; line-height: 1.5;">
-                        <ul style="margin: 0; padding-left: 18px;">
-                            <li>
-                                <span class="lang-el" lang="nl">Houdbaar broodbeleg, kaas en vriezerbrood voor kantoor mag gedeclareerd worden. Medewerkers en bestuurders die kantoorwerkzaamheden hebben in de avond, mogen koken op kantoor voor een bedrag van €5,00 p.p. Als iemand alleen is, is dat €7,50.</span>
-                                <span class="lang-el lang-hidden" lang="en">Non-perishable sandwich toppings, cheese, and freezer-bread for the office may be claimed. Employees and board members working at the office in the evening may cook at the office for an amount of €5.00 per person. If working alone, the allowance is €7.50.</span>
-                            </li>
-                            <li>
-                                <span class="lang-el" lang="nl">Medewerkers en bestuurders die werkzaamheden hebben in de avond buiten het kantoor, mogen een maaltijd declareren ter hoogte van €12,50.</span>
-                                <span class="lang-el lang-hidden" lang="en">Employees and board members who have evening duties outside the office may claim a meal up to €12.50.</span>
-                            </li>
-                        </ul>
-                    </td>
-                </tr>
-                <tr>
-                    <td style="padding: 10px; border: 1px solid #ddd; font-weight: bold; vertical-align: top;">
-                        <span class="lang-el" lang="nl">Cateringkosten<br>(buiten kantoor)</span>
-                        <span class="lang-el lang-hidden" lang="en">Catering costs<br>(outside office)</span>
-                    </td>
-                    <td style="padding: 10px; border: 1px solid #ddd; line-height: 1.5;">
-                        <ul style="margin: 0; padding-left: 18px;">
-                            <li>
-                                <span class="lang-el" lang="nl">ALV-commissies en vrijwilligerswerkgroepen mogen €12,50 p.p. aan lunch of maaltijdkosten declareren als lunchtijd (13:00) of avondeten (18:00) plaatsvind tijdens hun vergadering of werkzaamheden. Dit moet van tevoren afgestemd worden met de penningmeester.</span>
-                                <span class="lang-el lang-hidden" lang="en">General Members' Assembly (ALV) committees and volunteer working groups may claim €12.50 per person for lunch or meal costs if lunch hour (13:00) or dinner (18:00) occurs during their meeting or work. This must be aligned in advance with the treasurer.</span>
-                            </li>
-                            <li>
-                                <span class="lang-el" lang="nl">Voor vergadermomenten van de federatie, zoals ALV's of bondendagen, kan €5,00 aan boodschappenkosten gedeclareerd worden per aanwezige.</span>
-                                <span class="lang-el lang-hidden" lang="en">For federation assembly events, such as GMAs (ALVs) or union days, €5.00 in grocery expenses can be claimed per attendee.</span>
-                            </li>
-                        </ul>
-                    </td>
-                </tr>
-                <tr>
-                    <td style="padding: 10px; border: 1px solid #ddd; font-weight: bold; vertical-align: top;">
-                        <span class="lang-el" lang="nl">Representatiekosten</span>
-                        <span class="lang-el lang-hidden" lang="en">Representation costs</span>
-                    </td>
-                    <td style="padding: 10px; border: 1px solid #ddd; line-height: 1.5;">
-                        <ul style="margin: 0; padding-left: 18px;">
-                            <li>
-                                <span class="lang-el" lang="nl">Bij kennismaking of netwerkgesprekken mogen non-alcoholische drankjes worden aangeschaft. Met een maximum van één per persoon met een maximum van 5 euro per drankje.</span>
-                                <span class="lang-el lang-hidden" lang="en">Non-alcoholic drinks may be purchased for introductory or networking meetings. Limited to a maximum of one per person with a maximum of 5 euros per drink.</span>
-                            </li>
-                        </ul>
-                    </td>
-                </tr>
-                <tr>
-                    <td style="padding: 10px; border: 1px solid #ddd; font-weight: bold; vertical-align: top;">
-                        <span class="lang-el" lang="nl">Overige kosten</span>
-                        <span class="lang-el lang-hidden" lang="en">Other costs</span>
-                    </td>
-                    <td style="padding: 10px; border: 1px solid #ddd; line-height: 1.5;">
-                        <ul style="margin: 0; padding-left: 18px;">
-                            <li>
-                                <span class="lang-el" lang="nl">Overige kosten kunnen gedeclareerd worden als deze kosten gemaakt zijn voor (werkzaamheden van) de LSVb. Vraag voordat je de kosten maakt altijd bij een bestuurder of je de kosten kan declareren.</span>
-                                <span class="lang-el lang-hidden" lang="en">Other expenses can be claimed if they were incurred for (activities of) the LSVb. Always verify with a board member whether an expense can be claimed before making it.</span>
-                            </li>
-                        </ul>
-                    </td>
-                </tr>
-            </tbody>
-        </table>
+        <div class="table-responsive">
+            <table style="width: 100%; border-collapse: collapse; margin-top: 15px; font-size: 0.95em;">
+                <thead>
+                    <tr style="background-color: #eee;">
+                        <th style="width: 25%; text-align: left; padding: 10px; border: 1px solid #ddd;">
+                            <span class="lang-el" lang="nl">Type kosten</span>
+                            <span class="lang-el lang-hidden" lang="en">Type of Expense</span>
+                        </th>
+                        <th style="width: 75%; text-align: left; padding: 10px; border: 1px solid #ddd;">
+                            <span class="lang-el" lang="nl">Declaratieregels</span>
+                            <span class="lang-el lang-hidden" lang="en">Claim Rules</span>
+                        </th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td style="padding: 10px; border: 1px solid #ddd; font-weight: bold; vertical-align: top;">
+                            <span class="lang-el" lang="nl">Reiskosten<br>(openbaar vervoer)</span>
+                            <span class="lang-el lang-hidden" lang="en">Travel Expenses<br>(public transport)</span>
+                        </td>
+                        <td style="padding: 10px; border: 1px solid #ddd; line-height: 1.5;">
+                            <ul style="margin: 0; padding-left: 18px;">
+                                <li>
+                                    <span class="lang-el" lang="nl">Alleen het kortingstarief van reizen met het openbaar vervoer is declareerbaar. Dit is 60% van het voltarief.</span>
+                                    <span class="lang-el lang-hidden" lang="en">Only the discount rate for public transport travel is claimable. This is 60% of the full fare.</span>
+                                </li>
+                                <li>
+                                    <span class="lang-el" lang="nl">In het geval dat het niet mogelijk is om te reizen met het kortingstarief, kan er een uitzondering gemaakt worden op de regel hierboven. Hiervoor is van tevoren toestemming nodig van de penningmeester.</span>
+                                    <span class="lang-el lang-hidden" lang="en">In cases where it is impossible to travel at a discounted rate, an exception can be made to the above rule. This requires prior approval from the treasurer.</span>
+                                </li>
+                                <li>
+                                    <span class="lang-el" lang="nl">Het is mogelijk om een reisabonnement te declareren bij de LSVb, mits je kan aantonen dat dit voordeliger is voor de LSVb of dit van tevoren is afgesproken met de penningmeester.</span>
+                                    <span class="lang-el lang-hidden" lang="en">It is possible to claim a travel subscription with the LSVb, provided you can demonstrate that this is more economical for the LSVb and it has been agreed upon in advance with the treasurer.</span>
+                                </li>
+                                <li>
+                                    <span class="lang-el" lang="nl">Indien er van of naar een locatie gereisd wordt die verder ligt dan de woonplaats van de declarant, moet hier een aanvullende verklaring bij vermeldt worden, anders is het maximaal declareerbare bedrag tot of van een station in de woonplaats.</span>
+                                    <span class="lang-el lang-hidden" lang="en">If traveling to or from a location further than the claimant's place of residence, an additional explanation must be included; otherwise, the maximum claimable amount is limited to the station in your town of residence.</span>
+                                </li>
+                            </ul>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td style="padding: 10px; border: 1px solid #ddd; font-weight: bold; vertical-align: top;">
+                            <span class="lang-el" lang="nl">Reiskosten<br>(auto)</span>
+                            <span class="lang-el lang-hidden" lang="en">Travel Expenses<br>(car)</span>
+                        </td>
+                        <td style="padding: 10px; border: 1px solid #ddd; line-height: 1.5;">
+                            <ul style="margin: 0; padding-left: 18px;">
+                                <li>
+                                    <span class="lang-el" lang="nl">Reiskosten met de auto zijn alleen declareerbaar als hier van tevoren toestemming voor is verleend door de penningmeester.</span>
+                                    <span class="lang-el lang-hidden" lang="en">Car travel costs are only claimable if prior permission has been granted by the treasurer.</span>
+                                </li>
+                                <li>
+                                    <span class="lang-el" lang="nl">Vergoeding voor autoreiskosten is op basis van van maximale wettelijke onbelaste bedrag (huidig: €0,23/km).</span>
+                                    <span class="lang-el lang-hidden" lang="en">Reimbursement for car travel is based on the maximum legal untaxed allowance (currently: €0.23/km).</span>
+                                </li>
+                            </ul>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td style="padding: 10px; border: 1px solid #ddd; font-weight: bold; vertical-align: top;">
+                            <span class="lang-el" lang="nl">Parkeerkosten</span>
+                            <span class="lang-el lang-hidden" lang="en">Parking fees</span>
+                        </td>
+                        <td style="padding: 10px; border: 1px solid #ddd; line-height: 1.5;">
+                            <ul style="margin: 0; padding-left: 18px;">
+                                <li>
+                                    <span class="lang-el" lang="nl">Voor parkeerkosten is er voorgaand toestemming nodig van de penningmeester.</span>
+                                    <span class="lang-el lang-hidden" lang="en">Prior approval from the treasurer is required for parking fees.</span>
+                                </li>
+                            </ul>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td style="padding: 10px; border: 1px solid #ddd; font-weight: bold; vertical-align: top;">
+                            <span class="lang-el" lang="nl">Cateringkosten<br>(kantoor)</span>
+                            <span class="lang-el lang-hidden" lang="en">Catering costs<br>(office)</span>
+                        </td>
+                        <td style="padding: 10px; border: 1px solid #ddd; line-height: 1.5;">
+                            <ul style="margin: 0; padding-left: 18px;">
+                                <li>
+                                    <span class="lang-el" lang="nl">Houdbaar broodbeleg, kaas en vriezerbrood voor kantoor mag gedeclareerd worden. Medewerkers en bestuurders die kantoorwerkzaamheden hebben in de avond, mogen koken op kantoor voor een bedrag van €5,00 p.p. Als iemand alleen is, is dat €7,50.</span>
+                                    <span class="lang-el lang-hidden" lang="en">Non-perishable sandwich toppings, cheese, and freezer-bread for the office may be claimed. Employees and board members working at the office in the evening may cook at the office for an amount of €5.00 per person. If working alone, the allowance is €7.50.</span>
+                                </li>
+                                <li>
+                                    <span class="lang-el" lang="nl">Medewerkers en bestuurders die werkzaamheden hebben in de avond buiten het kantoor, mogen een maaltijd declareren ter hoogte van €12,50.</span>
+                                    <span class="lang-el lang-hidden" lang="en">Employees and board members who have evening duties outside the office may claim a meal up to €12.50.</span>
+                                </li>
+                            </ul>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td style="padding: 10px; border: 1px solid #ddd; font-weight: bold; vertical-align: top;">
+                            <span class="lang-el" lang="nl">Cateringkosten<br>(buiten kantoor)</span>
+                            <span class="lang-el lang-hidden" lang="en">Catering costs<br>(outside office)</span>
+                        </td>
+                        <td style="padding: 10px; border: 1px solid #ddd; line-height: 1.5;">
+                            <ul style="margin: 0; padding-left: 18px;">
+                                <li>
+                                    <span class="lang-el" lang="nl">ALV-commissies en vrijwilligerswerkgroepen mogen €12,50 p.p. aan lunch of maaltijdkosten declareren als lunchtijd (13:00) of avondeten (18:00) plaatsvind tijdens hun vergadering of werkzaamheden. Dit moet van tevoren afgestemd worden met de penningmeester.</span>
+                                    <span class="lang-el lang-hidden" lang="en">General Members' Assembly (ALV) committees and volunteer working groups may claim €12.50 per person for lunch or meal costs if lunch hour (13:00) or dinner (18:00) occurs during their meeting or work. This must be aligned in advance with the treasurer.</span>
+                                </li>
+                                <li>
+                                    <span class="lang-el" lang="nl">Voor vergadermomenten van de federatie, zoals ALV's of bondendagen, kan €5,00 aan boodschappenkosten gedeclareerd worden per aanwezige.</span>
+                                    <span class="lang-el lang-hidden" lang="en">For federation assembly events, such as GMAs (ALVs) or union days, €5.00 in grocery expenses can be claimed per attendee.</span>
+                                </li>
+                            </ul>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td style="padding: 10px; border: 1px solid #ddd; font-weight: bold; vertical-align: top;">
+                            <span class="lang-el" lang="nl">Representatiekosten</span>
+                            <span class="lang-el lang-hidden" lang="en">Representation costs</span>
+                        </td>
+                        <td style="padding: 10px; border: 1px solid #ddd; line-height: 1.5;">
+                            <ul style="margin: 0; padding-left: 18px;">
+                                <li>
+                                    <span class="lang-el" lang="nl">Bij kennismaking of netwerkgesprekken mogen non-alcoholische drankjes worden aangeschaft. Met een maximum van één per persoon met een maximum van 5 euro per drankje.</span>
+                                    <span class="lang-el lang-hidden" lang="en">Non-alcoholic drinks may be purchased for introductory or networking meetings. Limited to a maximum of one per person with a maximum of 5 euros per drink.</span>
+                                </li>
+                            </ul>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td style="padding: 10px; border: 1px solid #ddd; font-weight: bold; vertical-align: top;">
+                            <span class="lang-el" lang="nl">Overige kosten</span>
+                            <span class="lang-el lang-hidden" lang="en">Other costs</span>
+                        </td>
+                        <td style="padding: 10px; border: 1px solid #ddd; line-height: 1.5;">
+                            <ul style="margin: 0; padding-left: 18px;">
+                                <li>
+                                    <span class="lang-el" lang="nl">Overige kosten kunnen gedeclareerd worden als deze kosten gemaakt zijn voor (werkzaamheden van) de LSVb. Vraag voordat je de kosten maakt altijd bij een bestuurder of je de kosten kan declareren.</span>
+                                    <span class="lang-el lang-hidden" lang="en">Other expenses can be claimed if they were incurred for (activities of) the LSVb. Always verify with a board member whether an expense can be claimed before making it.</span>
+                                </li>
+                            </ul>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
         <span class="lang-el" lang="nl"><i>Alle declaraties worden beoordeeld door de penningmeester en financieel medewerker. Indien niet, of slechts gedeeltelijk tot vergoeding wordt overgegaan, wordt de declarant hierover geïnformeerd.</i></span>
         <span class="lang-el lang-hidden" lang="en"><i>All claims are evaluated by the treasurer and financial assistant. If a claim is rejected or only partially reimbursed, the claimant will be informed.</i></span>
     </div>
+
     <!-- BACK TO TOP LINK -->
     <div class="back-to-top-container">
         <a href="#" class="back-to-top-btn">
@@ -652,7 +597,6 @@
     <div class="modal-content">
          <span class="close-modal" onclick="closeAboutModal()">&times;</span>
         
-        <!-- DUTCH CONTENT -->
         <div class="lang-el" lang="nl">
             <h2 style="margin-top: 0;">Over DeclaBuddy</h2>
             <p><strong>DeclaBuddy</strong> is een open-source webapplicatie ontworpen voor het invullen en verwerken van PDF-declaratieformulieren. Gegevens, handtekeningen en bijlagen worden automatisch samengevoegd tot één overzichtelijk PDF-document.</p>
@@ -672,7 +616,6 @@
             </p>
         </div>
 
-        <!-- ENGLISH CONTENT -->
         <div class="lang-el lang-hidden" lang="en">
             <h2 style="margin-top: 0;">About DeclaBuddy</h2>
             <p><strong>DeclaBuddy</strong> is an open-source web application designed for expense claim submissions and the processing of PDF documents. It automatically compiles your data, signature, and receipts into a single PDF document.</p>

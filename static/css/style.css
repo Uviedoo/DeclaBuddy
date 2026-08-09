@@ -18,24 +18,33 @@ body {
     border-radius: 8px;
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
     flex: 1;
-    position: relative;
+    position: relative; /* Anchor point for absolute language selector */
     width: 100%;
     box-sizing: border-box;
 }
 
-h2, h3 {
+h2 {
+    border-bottom: 2px solid #c52a30;
+    padding-bottom: 8px;
+    color: #c52a30;
+    margin-top: 0;
+    padding-right: 100px; /* Leave space so title text never collides with top-right selector */
+}
+
+h3 {
     border-bottom: 2px solid #c52a30;
     padding-bottom: 8px;
     color: #c52a30;
 }
 
-/* LANGUAGE SWITCHER & INTERNATIONALIZATION */
+/* LANGUAGE SWITCHER - FIXED TOP RIGHT CORNER */
 .lang-switch {
     position: absolute;
     top: 30px;
     right: 30px;
     display: flex;
-    gap: 10px;
+    gap: 8px;
+    z-index: 10;
 }
 
 .lang-btn {
@@ -123,6 +132,13 @@ textarea {
 }
 
 /* EXPENSE TABLES & TOTALS */
+.table-responsive {
+    width: 100%;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    margin-bottom: 15px;
+}
+
 table {
     width: 100%;
     border-collapse: collapse;
@@ -540,15 +556,6 @@ footer {
     line-height: 1.35;
 }
 
-/* Responsive adjustment for small phone screens */
-@media (max-width: 600px) {
-    .steps-container {
-        display: grid;
-        grid-template-columns: repeat(2, 1fr);
-        gap: 15px 10px;
-    }
-}
-
 /* Enable smooth scrolling page-wide */
 html {
     scroll-behavior: smooth;
@@ -567,7 +574,7 @@ html {
 
 /* LOADING LIGHTBOX MODAL */
 .loading-modal-overlay {
-    display: none; /* Hidden by default */
+    display: none;
     position: fixed;
     top: 0;
     left: 0;
@@ -602,7 +609,7 @@ html {
     width: 48px;
     height: 48px;
     border: 5px solid #f3f3f3;
-    border-top: 5px solid #c52a30; /* Primary brand color */
+    border-top: 5px solid #c52a30;
     border-radius: 50%;
     animation: spin 1s linear infinite;
 }
@@ -638,4 +645,99 @@ html {
 
 .footer-link:hover {
     color: #c52a30;
+}
+
+/* MOBILE RESPONSIVE MEDIA QUERIES */
+@media screen and (max-width: 768px) {
+    body {
+        padding: 10px;
+    }
+
+    .wrapper {
+        padding: 15px;
+        width: 100%;
+        box-sizing: border-box;
+    }
+
+    .lang-switch {
+        top: 15px;
+        right: 15px;
+    }
+
+    .grid-2 {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+    }
+
+    .steps-container {
+        display: flex;
+        flex-direction: column;
+        gap: 15px;
+    }
+
+    .step-card {
+        width: 100%;
+        box-sizing: border-box;
+    }
+
+    .total-box {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 8px;
+    }
+
+    .total-box input {
+        width: 100%;
+    }
+
+    .action-buttons-container {
+        flex-direction: column-reverse;
+        gap: 10px;
+    }
+
+    .action-buttons-container button {
+        width: 100%;
+        min-height: 48px;
+        font-size: 1rem;
+    }
+
+    #sigCanvas {
+        touch-action: none;
+        width: 100%;
+        height: 180px;
+    }
+
+    table th, table td {
+        padding: 8px 6px;
+        font-size: 0.85rem;
+    }
+
+    input[type="text"],
+    input[type="email"],
+    input[type="number"],
+    input[type="date"],
+    textarea {
+        font-size: 16px !important;
+    }
+
+    .modal-content {
+        width: 92%;
+        padding: 18px;
+        max-height: 85vh;
+        overflow-y: auto;
+    }
+}
+
+@media (max-width: 600px) {
+    h2 {
+        padding-right: 90px;
+        font-size: 1.4rem;
+    }
+
+    .steps-container {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 15px 10px;
+    }
 }
