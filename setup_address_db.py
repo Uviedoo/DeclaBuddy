@@ -7,11 +7,19 @@ import threading
 import zstandard as zstd
 from datetime import datetime, timedelta
 
-DB_PATH = "addresses.db"
-TEMP_DB_PATH = "addresses_temp.db"
-META_PATH = "db_meta.json"
+# 1. BASE DIRECTORY & PERSISTENT STORAGE PATH RESOLUTION
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+DB_DIR = os.path.join(BASE_DIR, "db_storage")
+
+# Ensure persistent db_storage directory exists
+os.makedirs(DB_DIR, exist_ok=True)
+
+DB_PATH = os.path.join(DB_DIR, "addresses.db")
+TEMP_DB_PATH = os.path.join(DB_DIR, "addresses_temp.db")
+META_PATH = os.path.join(DB_DIR, "db_meta.json")
+ZST_TEMP_PATH = os.path.join(DB_DIR, "Nederland.csv.zst")
+
 ZST_URL = "https://raw.githubusercontent.com/LJPc-solutions/Nederlandse-adressen-en-postcodes/main/Nederland.csv.zst"
-ZST_TEMP_PATH = "Nederland.csv.zst"
 
 # Global lock to prevent simultaneous executions across threads
 _db_update_lock = threading.Lock()
@@ -24,7 +32,7 @@ def get_remote_file_etag():
             etag = response.headers.get('ETag') or response.headers.get('Last-Modified')
             return etag
     except Exception as e:
-        print(f"⚠️ Failed to fetch remote metadata: {e}")
+        print(f"⚠️ Failed to fetch remote metadata: {e}", flush=True)
         return None
 
 def load_metadata():
@@ -61,10 +69,10 @@ def should_check_for_update():
 
 def build_database():
     """Downloads dataset and compiles it into a temporary database."""
-    print("📥 Downloading latest Nederlandse-adressen-en-postcodes dataset...")
+    print("📥 Downloading latest Nederlandse-adressen-en-postcodes dataset...", flush=True)
     urllib.request.urlretrieve(ZST_URL, ZST_TEMP_PATH)
 
-    print("⚡ Decompressing Zstandard CSV and building SQLite database...")
+    print("⚡ Decompressing Zstandard CSV and building SQLite database...", flush=True)
     if os.path.exists(TEMP_DB_PATH):
         os.remove(TEMP_DB_PATH)
 
@@ -107,7 +115,7 @@ def build_database():
             if batch:
                 cursor.executemany("INSERT INTO addresses VALUES (?, ?, ?, ?, ?, ?)", batch)
 
-    print(f"📦 Imported {count:,} addresses. Indexing database...")
+    print(f"📦 Imported {count:,} addresses. Indexing database...", flush=True)
     cursor.execute("CREATE INDEX idx_postcode_hnr ON addresses (postcode, huisnummer)")
     conn.commit()
     conn.close()
@@ -116,40 +124,40 @@ def build_database():
     if os.path.exists(ZST_TEMP_PATH):
         os.remove(ZST_TEMP_PATH)
 
-    # Atomic Swap: Replace old DB with new DB safely
+    # Atomic Swap inside db_storage: Replace old DB with new DB safely
     if os.path.exists(DB_PATH):
         os.remove(DB_PATH)
     os.rename(TEMP_DB_PATH, DB_PATH)
 
-    print("🚀 Address database updated successfully!")
+    print("🚀 Address database updated successfully!", flush=True)
 
 def init_address_database(force=False):
     """Main function to initialize or update the database if a weekly update is due."""
     if not _db_update_lock.acquire(blocking=False):
-        print("⚠️ Address database update is already running in another thread. Skipping duplicate call.")
+        print("⚠️ Address database update is already running in another thread. Skipping duplicate call.", flush=True)
         return
 
     try:
         if not os.path.exists(DB_PATH):
-            print("📦 Database missing. Running initial setup...")
+            print("📦 Database missing. Running initial setup...", flush=True)
             remote_etag = get_remote_file_etag()
             build_database()
             save_metadata(remote_etag)
             return
 
         if not force and not should_check_for_update():
-            print("✅ Address database is up-to-date (weekly check not due yet).")
+            print("✅ Address database is up-to-date (weekly check not due yet).", flush=True)
             return
 
-        print("🔍 Performing weekly update check for address database...")
+        print("🔍 Performing weekly update check for address database...", flush=True)
         remote_etag = get_remote_file_etag()
         local_meta = load_metadata()
 
         if remote_etag and remote_etag == local_meta.get("etag") and not force:
-            print("✅ Remote database source has not changed. Updating check timestamp...")
+            print("✅ Remote database source has not changed. Updating check timestamp...", flush=True)
             save_metadata(remote_etag)
         else:
-            print("🔄 New update found! Rebuilding database...")
+            print("🔄 New update found! Rebuilding database...", flush=True)
             build_database()
             save_metadata(remote_etag)
 
