@@ -10,6 +10,8 @@ from dotenv import load_dotenv
 from apscheduler.schedulers.background import BackgroundScheduler
 from flask_limiter import Limiter
 from flask_limiter.util import get_remote_address
+from werkzeug.middleware.proxy_fix import ProxyFix
+from flask_wtf.csrf import CSRFProtect, CSRFError
 import filetype
 
 # Database auto-update script
@@ -22,7 +24,29 @@ import fitz  # PyMuPDF
 load_dotenv()
 
 app = Flask(__name__)
+
+# 1. SECRET KEY & SESSION COOKIE CONFIGURATION
 app.secret_key = os.getenv("FLASK_SECRET_KEY")
+
+app.config['SESSION_COOKIE_SECURE'] = True
+app.config['SESSION_COOKIE_HTTPONLY'] = True
+app.config['SESSION_COOKIE_SAMESITE'] = 'Lax'
+
+# 2. CSRF PROTECTION CONFIGURATION
+app.config['WTF_CSRF_SSL_STRICT'] = False
+
+# Initialize CSRF protection
+csrf = CSRFProtect(app)
+
+# 3. PROXYFIX MIDDLEWARE
+app.wsgi_app = ProxyFix(
+    app.wsgi_app,
+    x_for=1,
+    x_proto=1,
+    x_host=1,
+    x_port=1,
+    x_prefix=1
+)
 
 # Set maximum upload size limit to 25 MB
 app.config['MAX_CONTENT_LENGTH'] = 25 * 1024 * 1024
@@ -68,7 +92,7 @@ def is_allowed_file(file_storage) -> bool:
 
     return True
 
-# SECURITY HEADERS
+# 4. SECURITY & CACHE HEADERS
 @app.after_request
 def set_security_headers(response):
     """Enforces standard security headers on all HTTP responses."""
@@ -85,13 +109,19 @@ def set_security_headers(response):
     )
     return response
 
-# Handle HTTP 413 "Request Entity Too Large" errors cleanly
+# 5. ERROR HANDLERS
+@app.errorhandler(CSRFError)
+def handle_csrf_error(e):
+    """Logs the exact CSRF error detail and displays a helpful flash message."""
+    print(f"CSRF Error Detail: {e.description}", flush=True)
+    flash(f"Beveiligingsfout (CSRF): {e.description}", "error")
+    return redirect(url_for('claim_form'))
+
 @app.errorhandler(413)
 def request_entity_too_large(error):
     flash("Fout: De geüploade bestanden zijn te groot (maximaal 25 MB totaal).", "error")
     return redirect(url_for('claim_form'))
 
-# Handle HTTP 429 "Rate Limit Exceeded" errors cleanly
 @app.errorhandler(429)
 def rate_limit_exceeded(error):
     flash("Te veel verzoeken! Probeer het later opnieuw.", "error")
@@ -192,7 +222,7 @@ def flatten_and_sanitize_pdf(filled_bytes: bytes, receipt_files: list) -> bytes:
     doc.close()
     return output_bytes
 
-# LOCAL HOSTED ADDRESS LOOKUP API
+# LOCAL HOSTED ADDRESS LOOKUP API (READ-ONLY SQLITE)
 @app.route("/api/address-lookup", methods=["GET"])
 @limiter.limit("30 per minute")  # Prevent address lookup API spamming
 def api_address_lookup():
@@ -208,7 +238,9 @@ def api_address_lookup():
     base_hnr = "".join(filter(str.isdigit, huisnummer)) or huisnummer
 
     try:
-        conn = sqlite3.connect(DB_PATH)
+        # Read-only SQLite Connection
+        db_uri = f"file:{os.path.abspath(DB_PATH)}?mode=ro"
+        conn = sqlite3.connect(db_uri, uri=True)
         cursor = conn.cursor()
 
         cursor.execute("""
@@ -301,9 +333,11 @@ def claim_form():
                 download_name=output_filename,
                 mimetype="application/pdf"
             )
-            # Prevent caching of personal claim documents
+            
+            # No-store Cache Headers
             response.headers['Cache-Control'] = 'no-store, no-cache, must-revalidate, max-age=0'
             response.headers['Pragma'] = 'no-cache'
+            response.headers['Expires'] = '0'
             return response
 
         except Exception as e:
