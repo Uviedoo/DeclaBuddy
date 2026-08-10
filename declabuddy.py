@@ -28,7 +28,7 @@ app = Flask(__name__)
 # 1. SECRET KEY & SESSION COOKIE CONFIGURATION
 app.secret_key = os.getenv("FLASK_SECRET_KEY")
 
-app.config['SESSION_COOKIE_SECURE'] = False
+app.config['SESSION_COOKIE_SECURE'] = True  # Ensure cookies are only sent over HTTPS
 app.config['SESSION_COOKIE_HTTPONLY'] = True
 app.config['SESSION_COOKIE_SAMESITE'] = 'Lax'
 
